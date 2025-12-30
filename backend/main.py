@@ -7,12 +7,15 @@ from sqlalchemy.orm import Session
 
 from database import SessionLocal
 from models import AuditLog
+from routers.ai_system import router as ai_system_router
 
 app = FastAPI(
     title="AI-GRC Control Tower",
     description="Regulator-first AI governance platform",
     version="0.1.0",
 )
+
+app.include_router(ai_system_router)
 
 
 def hash_payload(payload: dict) -> str:
