@@ -22,13 +22,6 @@ class TraceableMixin:
     purpose: Mapped[str] = mapped_column(Text, nullable=False)
 
 
-class AISystem(TraceableMixin, Base):
-    __tablename__ = "ai_systems"
-
-    name: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[str] = mapped_column(Text, nullable=True)
-
-
 class PromptVersion(TraceableMixin, Base):
     __tablename__ = "prompt_versions"
 
@@ -70,3 +63,6 @@ class AuditLog(Base):
     entity_type: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     entity_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     payload_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+
+
+from .ai_system import AISystem, LifecycleStatus, RiskClassification  # noqa: E402
