@@ -1,4 +1,6 @@
 import uuid
+from datetime import datetime
+from typing import Optional
 
 from sqlalchemy import DateTime, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
@@ -7,6 +9,10 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 class Base(DeclarativeBase):
     pass
+
+
+def generate_uuid() -> str:
+    return str(uuid.uuid4())
 
 
 class TraceableMixin:
@@ -54,9 +60,13 @@ class Incident(TraceableMixin, Base):
     details: Mapped[str] = mapped_column(Text, nullable=False)
 
 
-class AuditLog(TraceableMixin, Base):
+class AuditLog(Base):
     __tablename__ = "audit_logs"
 
-    actor: Mapped[str] = mapped_column(String(255), nullable=False)
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=generate_uuid)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    user_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     action: Mapped[str] = mapped_column(String(255), nullable=False)
-    payload: Mapped[str] = mapped_column(Text, nullable=True)
+    entity_type: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    entity_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    payload_hash: Mapped[str] = mapped_column(String(255), nullable=False)
