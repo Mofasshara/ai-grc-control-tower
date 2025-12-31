@@ -33,14 +33,21 @@ class ChangeRequest(Base):
         nullable=False,
     )
 
-    change_type = Column(Enum(ChangeType), nullable=False)
+    change_type = Column(
+        Enum(ChangeType, values_callable=lambda enum_cls: [e.value for e in enum_cls]),
+        nullable=False,
+    )
 
     description = Column(Text, nullable=False)
     business_justification = Column(Text, nullable=False)
     impact_assessment = Column(Text, nullable=False)
     rollback_plan = Column(Text, nullable=False)
 
-    status = Column(Enum(ChangeStatus), default=ChangeStatus.DRAFT, nullable=False)
+    status = Column(
+        Enum(ChangeStatus, values_callable=lambda enum_cls: [e.value for e in enum_cls]),
+        default=ChangeStatus.DRAFT,
+        nullable=False,
+    )
 
     requested_by = Column(String, nullable=False)
     approved_by = Column(String, nullable=True)

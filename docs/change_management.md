@@ -55,6 +55,11 @@ High-risk AI systems require Compliance approval due to their potential impact o
 - Financial stability
 - Regulatory exposure
 
+## API Endpoints (Current Implementation)
+- POST /ai-systems/{id}/changes
+- GET /changes
+- GET /changes/{id}
+
 ## Purpose of This Policy
 
 This policy ensures that all modifications to AI systems are:
