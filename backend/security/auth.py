@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 
 from security.roles import Role
 
@@ -18,12 +18,14 @@ def get_current_user():
 
 
 def require_roles(*allowed_roles: Role):
-    def dependency(user: MockUser = Depends(get_current_user)):
+    def dependency(request: Request, user: MockUser = Depends(get_current_user)):
         if user.role not in allowed_roles:
             raise HTTPException(
                 status_code=403,
                 detail=f"User role '{user.role}' not permitted for this action",
             )
+        state = request.scope.setdefault("state", {})
+        state["user"] = user
         return user
 
     return dependency

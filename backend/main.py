@@ -50,6 +50,10 @@ async def audit_logging_middleware(request: Request, call_next):
     action = state.get("audit_action", f"{method} {path}")
     entity_id = state.get("audit_entity_id")
     entity_type = state.get("audit_entity_type")
+    state_hash = None
+    if "audit_previous_state" in state and "audit_new_state" in state:
+        combined = f"{state['audit_previous_state']}->{state['audit_new_state']}"
+        state_hash = hashlib.sha256(combined.encode("utf-8")).hexdigest()
 
     db: Session = SessionLocal()
     try:
@@ -60,6 +64,7 @@ async def audit_logging_middleware(request: Request, call_next):
             entity_type=entity_type,
             entity_id=entity_id,
             payload_hash=payload_hash,
+            state_hash=state_hash,
         )
         db.add(log_entry)
         db.commit()

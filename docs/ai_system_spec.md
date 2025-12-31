@@ -18,6 +18,8 @@ An AI System represents a governed AI capability subject to compliance controls.
 - Active
 - Retired
 
+Note: In the current API, `updated_by` is informational only. Authorization is enforced by the mock user role in `backend/security/auth.py`.
+
 Purpose
 
 Auditors think in systems, not code artifacts.

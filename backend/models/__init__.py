@@ -63,6 +63,7 @@ class AuditLog(Base):
     entity_type: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     entity_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     payload_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    state_hash: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
 
 from .ai_system import AISystem, LifecycleStatus, RiskClassification  # noqa: E402

@@ -13,6 +13,8 @@ class RiskClassification(str, Enum):
 
 class LifecycleStatus(str, Enum):
     draft = "draft"
+    submitted = "submitted"
+    approved = "approved"
     active = "active"
     deprecated = "deprecated"
     retired = "retired"

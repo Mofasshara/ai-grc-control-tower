@@ -17,6 +17,8 @@ class RiskClassification(str, enum.Enum):
 
 class LifecycleStatus(str, enum.Enum):
     draft = "draft"
+    submitted = "submitted"
+    approved = "approved"
     active = "active"
     deprecated = "deprecated"
     retired = "retired"
@@ -38,3 +40,12 @@ class AISystem(Base):
     )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     created_by: Mapped[str] = mapped_column(String(255), nullable=False)
+
+
+ALLOWED_TRANSITIONS = {
+    "draft": ["submitted"],
+    "submitted": ["approved"],
+    "approved": ["active"],
+    "active": ["retired"],
+    "retired": [],
+}
