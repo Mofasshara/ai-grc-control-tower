@@ -54,3 +54,16 @@ class ChangeRequest(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     approved_at = Column(DateTime, nullable=True)
+
+
+ALLOWED_CHANGE_TRANSITIONS = {
+    "draft": ["submitted"],
+    "submitted": ["approved", "rejected"],
+    "approved": ["implemented"],
+    "rejected": [],
+    "implemented": [],
+}
+
+
+def is_valid_transition(current: str, new: str) -> bool:
+    return new in ALLOWED_CHANGE_TRANSITIONS[current]
