@@ -4,11 +4,17 @@ from sqlalchemy.orm import Session
 from schemas.ai_system import AISystemCreate, AISystemResponse
 from models.ai_system import AISystem
 from database import get_db
+from security.auth import require_roles
+from security.roles import Role
 
 router = APIRouter(prefix="/ai-systems", tags=["AI Systems"])
 
 
-@router.post("/", response_model=AISystemResponse)
+@router.post(
+    "/",
+    response_model=AISystemResponse,
+    dependencies=[Depends(require_roles(Role.ADMIN, Role.AI_OWNER))],
+)
 def create_ai_system(payload: AISystemCreate, request: Request, db: Session = Depends(get_db)):
     existing = db.query(AISystem).filter(AISystem.name == payload.name).first()
     if existing:
