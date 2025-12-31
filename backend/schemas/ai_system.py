@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class RiskClassification(str, Enum):
@@ -38,5 +38,4 @@ class AISystemResponse(BaseModel):
     created_at: datetime
     created_by: str
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

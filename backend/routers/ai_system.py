@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from schemas.ai_system import AISystemCreate, AISystemResponse
@@ -9,7 +9,7 @@ router = APIRouter(prefix="/ai-systems", tags=["AI Systems"])
 
 
 @router.post("/", response_model=AISystemResponse)
-def create_ai_system(payload: AISystemCreate, db: Session = Depends(get_db)):
+def create_ai_system(payload: AISystemCreate, request: Request, db: Session = Depends(get_db)):
     existing = db.query(AISystem).filter(AISystem.name == payload.name).first()
     if existing:
         raise HTTPException(status_code=400, detail="AI system name must be unique")
@@ -28,6 +28,10 @@ def create_ai_system(payload: AISystemCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_system)
 
+    state = request.scope.setdefault("state", {})
+    state["audit_action"] = "AI_SYSTEM_CREATED"
+    state["audit_entity_id"] = new_system.id
+
     return new_system
 
 
@@ -38,8 +42,13 @@ def list_ai_systems(db: Session = Depends(get_db)):
 
 
 @router.get("/{system_id}", response_model=AISystemResponse)
-def get_ai_system(system_id: str, db: Session = Depends(get_db)):
+def get_ai_system(system_id: str, request: Request, db: Session = Depends(get_db)):
     system = db.query(AISystem).filter(AISystem.id == system_id).first()
     if not system:
         raise HTTPException(status_code=404, detail="AI system not found")
+
+    state = request.scope.setdefault("state", {})
+    state["audit_action"] = "AI_SYSTEM_VIEWED"
+    state["audit_entity_id"] = system.id
+
     return system
