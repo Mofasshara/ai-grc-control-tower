@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models.prompt_template import PromptTemplate
 from models.prompt_version import PromptStatus, PromptVersion
+from models.change_request import ChangeRequest
 from schemas.prompt import (
     PromptTemplateCreate,
     PromptTemplateResponse,
@@ -15,6 +16,7 @@ from schemas.prompt import (
 )
 from security.auth import get_current_user, require_roles
 from security.roles import Role
+from schemas.submit import VersionSubmitRequest
 from utils.diff import generate_unified_diff
 
 router = APIRouter(prefix="/prompts", tags=["Prompt Governance"])
@@ -149,3 +151,55 @@ def get_prompt_diff(version_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Prompt version not found")
 
     return {"diff": version.diff_from_prev}
+
+
+@router.post(
+    "/versions/{version_id}/submit",
+    dependencies=[Depends(require_roles(Role.ADMIN, Role.AI_OWNER))],
+)
+def submit_prompt_version(
+    version_id: str,
+    payload: VersionSubmitRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    version = db.query(PromptVersion).filter(PromptVersion.id == version_id).first()
+    if not version:
+        raise HTTPException(status_code=404, detail="Prompt version not found")
+
+    change_request = (
+        db.query(ChangeRequest)
+        .filter(ChangeRequest.id == payload.change_request_id)
+        .first()
+    )
+    if not change_request:
+        raise HTTPException(status_code=404, detail="Change request not found")
+
+    change_status = getattr(change_request.status, "value", change_request.status)
+    if change_status != "submitted":
+        raise HTTPException(
+            status_code=400,
+            detail="Change request must be SUBMITTED before linking",
+        )
+
+    if version.change_request_id and str(version.change_request_id) != payload.change_request_id:
+        raise HTTPException(status_code=400, detail="Prompt version already linked")
+
+    version.change_request_id = change_request.id
+    version.status = PromptStatus.SUBMITTED
+
+    db.commit()
+    db.refresh(version)
+
+    state = request.scope.setdefault("state", {})
+    state["audit_action"] = "PROMPT_VERSION_SUBMITTED"
+    state["audit_entity_id"] = version.id
+    state["audit_entity_type"] = "PROMPT_VERSION"
+
+    return {
+        "id": version.id,
+        "status": getattr(version.status, "value", version.status),
+        "change_request_id": version.change_request_id,
+        "submitted_by": user.username,
+    }

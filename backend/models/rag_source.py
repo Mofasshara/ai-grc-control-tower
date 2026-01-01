@@ -21,7 +21,14 @@ class RAGSource(Base):
     id = Column(UUID(as_uuid=False), primary_key=True, default=generate_uuid)
     name = Column(String, unique=True, nullable=False)
     description = Column(Text, nullable=False)
-    source_type = Column(Enum(RAGSourceType, create_type=False), nullable=False)
+    source_type = Column(
+        Enum(
+            RAGSourceType,
+            values_callable=lambda enum_cls: [e.value for e in enum_cls],
+            create_type=False,
+        ),
+        nullable=False,
+    )
 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     created_by = Column(String, nullable=False)

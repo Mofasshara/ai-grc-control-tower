@@ -14,7 +14,7 @@ def get_current_user():
     Temporary mock user.
     Replace with Entra ID integration later.
     """
-    return MockUser(username="mofasshara", role=Role.ADMIN)
+    return MockUser(username="mofasshara", role=Role.COMPLIANCE)
 
 
 def require_roles(*allowed_roles: Role):

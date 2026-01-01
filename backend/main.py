@@ -11,6 +11,7 @@ from models import AuditLog
 from routers.ai_system import router as ai_system_router
 from routers.change_request import router as change_request_router
 from routers.prompt import router as prompt_router
+from routers.rag import router as rag_router
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,7 @@ app = FastAPI(
 app.include_router(ai_system_router)
 app.include_router(change_request_router)
 app.include_router(prompt_router)
+app.include_router(rag_router)
 
 
 def hash_payload(payload: dict) -> str:
