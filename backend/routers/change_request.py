@@ -118,6 +118,52 @@ def approve_change_request(
 
 
 @router.post(
+    "/changes/{change_id}/reject",
+    dependencies=[Depends(require_roles(Role.ADMIN, Role.COMPLIANCE))],
+)
+def reject_change_request(
+    change_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    change = db.query(ChangeRequest).filter(ChangeRequest.id == change_id).first()
+    if not change:
+        raise HTTPException(status_code=404, detail="Change request not found")
+
+    current_value = getattr(change.status, "value", change.status)
+    new_value = ChangeStatus.REJECTED.value
+
+    if not is_valid_transition(current_value, new_value):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid transition: {current_value} -> {new_value}",
+        )
+
+    change.status = ChangeStatus.REJECTED
+    change.approved_by = user.username
+    change.approved_at = datetime.utcnow()
+
+    db.commit()
+    db.refresh(change)
+
+    state = request.scope.setdefault("state", {})
+    state["audit_action"] = "CHANGE_REQUEST_REJECTED"
+    state["audit_entity_id"] = change.id
+    state["audit_entity_type"] = "CHANGE_REQUEST"
+    state["audit_previous_state"] = current_value
+    state["audit_new_state"] = new_value
+
+    return {
+        "id": change.id,
+        "old_status": current_value,
+        "new_status": new_value,
+        "rejected_by": user.username,
+        "rejected_at": change.approved_at,
+    }
+
+
+@router.post(
     "/changes/{change_id}/submit",
     dependencies=[Depends(require_roles(Role.ADMIN, Role.AI_OWNER))],
 )
@@ -159,4 +205,50 @@ def submit_change_request(
         "old_status": current_value,
         "new_status": new_value,
         "submitted_by": user.username,
+    }
+
+
+@router.post(
+    "/changes/{change_id}/implement",
+    dependencies=[Depends(require_roles(Role.ADMIN, Role.AI_OWNER))],
+)
+def implement_change_request(
+    change_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    change = db.query(ChangeRequest).filter(ChangeRequest.id == change_id).first()
+    if not change:
+        raise HTTPException(status_code=404, detail="Change request not found")
+
+    current_value = getattr(change.status, "value", change.status)
+    new_value = ChangeStatus.IMPLEMENTED.value
+
+    if not is_valid_transition(current_value, new_value):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid transition: {current_value} -> {new_value}",
+        )
+
+    change.status = ChangeStatus.IMPLEMENTED
+    change.approved_by = user.username
+    change.approved_at = datetime.utcnow()
+
+    db.commit()
+    db.refresh(change)
+
+    state = request.scope.setdefault("state", {})
+    state["audit_action"] = "CHANGE_REQUEST_IMPLEMENTED"
+    state["audit_entity_id"] = change.id
+    state["audit_entity_type"] = "CHANGE_REQUEST"
+    state["audit_previous_state"] = current_value
+    state["audit_new_state"] = new_value
+
+    return {
+        "id": change.id,
+        "old_status": current_value,
+        "new_status": new_value,
+        "implemented_by": user.username,
+        "implemented_at": change.approved_at,
     }
