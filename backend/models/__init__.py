@@ -22,13 +22,6 @@ class TraceableMixin:
     purpose: Mapped[str] = mapped_column(Text, nullable=False)
 
 
-class PromptVersion(TraceableMixin, Base):
-    __tablename__ = "prompt_versions"
-
-    ai_system_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
-    prompt_text: Mapped[str] = mapped_column(Text, nullable=False)
-
-
 class Approval(TraceableMixin, Base):
     __tablename__ = "approvals"
 
@@ -60,3 +53,5 @@ class AuditLog(Base):
 
 from .ai_system import AISystem, LifecycleStatus, RiskClassification  # noqa: E402
 from .change_request import ChangeRequest, ChangeStatus, ChangeType  # noqa: E402
+from .prompt_template import PromptTemplate  # noqa: E402
+from .prompt_version import PromptStatus, PromptVersion  # noqa: E402
