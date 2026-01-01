@@ -55,3 +55,7 @@ from .ai_system import AISystem, LifecycleStatus, RiskClassification  # noqa: E4
 from .change_request import ChangeRequest, ChangeStatus, ChangeType  # noqa: E402
 from .prompt_template import PromptTemplate  # noqa: E402
 from .prompt_version import PromptStatus, PromptVersion  # noqa: E402
+from .rag_source import RAGSource, RAGSourceType  # noqa: E402
+from .rag_source_version import RAGSourceStatus, RAGSourceVersion  # noqa: E402
+from .ai_system_prompt_binding import AISystemPromptBinding  # noqa: E402
+from .ai_system_rag_binding import AISystemRAGBinding  # noqa: E402
