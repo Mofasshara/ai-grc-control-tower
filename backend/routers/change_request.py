@@ -231,6 +231,10 @@ def implement_change_request(
             detail="Change cannot be implemented unless status = APPROVED",
         )
 
+    ai_system = db.query(AISystem).filter(AISystem.id == change.ai_system_id).first()
+    if not ai_system:
+        raise HTTPException(status_code=404, detail="AI system not found")
+
     change.status = ChangeStatus.IMPLEMENTED
     change.approved_by = user.username
     change.approved_at = datetime.utcnow()
