@@ -225,18 +225,21 @@ def implement_change_request(
     current_value = getattr(change.status, "value", change.status)
     new_value = ChangeStatus.IMPLEMENTED.value
 
-    if not is_valid_transition(current_value, new_value):
+    if current_value != ChangeStatus.APPROVED.value:
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid transition: {current_value} -> {new_value}",
+            detail="Change cannot be implemented unless status = APPROVED",
         )
 
     change.status = ChangeStatus.IMPLEMENTED
     change.approved_by = user.username
     change.approved_at = datetime.utcnow()
+    ai_system.last_changed_at = datetime.utcnow()
+    ai_system.last_change_request_id = change.id
 
     db.commit()
     db.refresh(change)
+    db.refresh(ai_system)
 
     state = request.scope.setdefault("state", {})
     state["audit_action"] = "CHANGE_REQUEST_IMPLEMENTED"
@@ -246,9 +249,11 @@ def implement_change_request(
     state["audit_new_state"] = new_value
 
     return {
-        "id": change.id,
+        "change_id": change.id,
+        "ai_system_id": ai_system.id,
         "old_status": current_value,
         "new_status": new_value,
         "implemented_by": user.username,
         "implemented_at": change.approved_at,
+        "last_changed_at": ai_system.last_changed_at,
     }

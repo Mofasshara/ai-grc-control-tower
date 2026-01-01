@@ -40,6 +40,8 @@ class AISystem(Base):
     )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     created_by: Mapped[str] = mapped_column(String(255), nullable=False)
+    last_changed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_change_request_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), nullable=True)
 
 
 ALLOWED_TRANSITIONS = {
