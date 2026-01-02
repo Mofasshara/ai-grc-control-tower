@@ -59,3 +59,4 @@ from .rag_source import RAGSource, RAGSourceType  # noqa: E402
 from .rag_source_version import RAGSourceStatus, RAGSourceVersion  # noqa: E402
 from .ai_system_prompt_binding import AISystemPromptBinding  # noqa: E402
 from .ai_system_rag_binding import AISystemRAGBinding  # noqa: E402
+from .ai_incident import AIIncident, ImpactArea, IncidentSeverity, IncidentStatus, IncidentType  # noqa: E402

@@ -1,0 +1,70 @@
+import enum
+import uuid
+from datetime import datetime
+
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Text
+from sqlalchemy.dialects.postgresql import UUID
+
+from . import Base
+
+
+def generate_uuid():
+    return str(uuid.uuid4())
+
+
+class IncidentType(str, enum.Enum):
+    HALLUCINATION = "Hallucination"
+    INCORRECT_OUTPUT = "Incorrect factual output"
+    POLICY_VIOLATION = "Policy violation"
+    BIAS = "Bias / fairness issue"
+    UNSAFE_RECOMMENDATION = "Unsafe recommendation"
+
+
+class IncidentSeverity(str, enum.Enum):
+    LOW = "Low"
+    MEDIUM = "Medium"
+    HIGH = "High"
+
+
+class ImpactArea(str, enum.Enum):
+    REGULATORY = "Regulatory compliance"
+    CUSTOMER = "Customer impact"
+    PATIENT = "Patient safety"
+    FINANCIAL = "Financial risk"
+    REPUTATIONAL = "Reputational risk"
+
+
+class IncidentStatus(str, enum.Enum):
+    OPEN = "OPEN"
+    UNDER_INVESTIGATION = "UNDER_INVESTIGATION"
+    RESOLVED = "RESOLVED"
+    CLOSED = "CLOSED"
+
+
+class AIIncident(Base):
+    __tablename__ = "ai_incidents"
+
+    id = Column(UUID(as_uuid=False), primary_key=True, default=generate_uuid)
+
+    ai_system_id = Column(
+        UUID(as_uuid=False),
+        ForeignKey("ai_systems.id"),
+        nullable=False,
+    )
+
+    incident_type = Column(Enum(IncidentType), nullable=False)
+
+    description = Column(Text, nullable=False)
+
+    severity = Column(Enum(IncidentSeverity), nullable=False)
+
+    impact_area = Column(Enum(ImpactArea), nullable=False)
+
+    detected_by = Column(String, nullable=False)
+
+    detection_date = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    status = Column(Enum(IncidentStatus), default=IncidentStatus.OPEN, nullable=False)
+
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_by = Column(String, nullable=False)
