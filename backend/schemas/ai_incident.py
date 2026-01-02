@@ -21,6 +21,7 @@ class AIIncidentCreate(BaseModel):
 class AIIncidentResponse(BaseModel):
     id: str
     ai_system_id: str
+    corrective_change_request_id: str | None = None
     incident_type: IncidentType
     severity: IncidentSeverity
     impact_area: ImpactArea
@@ -37,3 +38,7 @@ class AIIncidentResponse(BaseModel):
 class AIIncidentInvestigation(BaseModel):
     root_cause_category: RootCauseCategory
     root_cause_description: str
+
+
+class CorrectiveActionLink(BaseModel):
+    change_request_id: str

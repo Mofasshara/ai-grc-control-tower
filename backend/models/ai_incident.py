@@ -85,3 +85,8 @@ class AIIncident(Base):
         nullable=True,
     )
     root_cause_description = Column(Text, nullable=True)
+    corrective_change_request_id = Column(
+        UUID(as_uuid=False),
+        ForeignKey("change_requests.id"),
+        nullable=True,
+    )

@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import DateTime, String, Text, func
+from sqlalchemy import DateTime, JSON, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -49,6 +49,7 @@ class AuditLog(Base):
     entity_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     payload_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     state_hash: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    audit_metadata: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
 
 from .ai_system import AISystem, LifecycleStatus, RiskClassification  # noqa: E402

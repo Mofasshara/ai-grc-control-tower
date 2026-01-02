@@ -3,11 +3,18 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from models.ai_incident import AIIncident, IncidentStatus
+from models.change_request import ChangeRequest, ChangeType
 from models.ai_system import AISystem
 from schemas.ai_incident import (
     AIIncidentCreate,
     AIIncidentInvestigation,
     AIIncidentResponse,
+    CorrectiveActionLink,
+)
+from utils.audit import (
+    AI_INCIDENT_INVESTIGATED,
+    AI_INCIDENT_REPORTED,
+    AI_INCIDENT_RESOLVED,
 )
 from security.auth import get_current_user
 from security.roles import Role
@@ -43,9 +50,14 @@ def create_incident(
     db.refresh(incident)
 
     state = request.scope.setdefault("state", {})
-    state["audit_action"] = "AI_INCIDENT_REPORTED"
+    state["audit_action"] = AI_INCIDENT_REPORTED
     state["audit_entity_id"] = incident.id
     state["audit_entity_type"] = "AI_INCIDENT"
+    state["audit_metadata"] = {
+        "ai_system_id": ai_system_id,
+        "incident_id": incident.id,
+        "user": user.username,
+    }
 
     return incident
 
@@ -87,8 +99,64 @@ def investigate_incident(
     db.refresh(incident)
 
     state = request.scope.setdefault("state", {})
-    state["audit_action"] = "AI_INCIDENT_INVESTIGATION_STARTED"
+    state["audit_action"] = AI_INCIDENT_INVESTIGATED
     state["audit_entity_id"] = incident.id
     state["audit_entity_type"] = "AI_INCIDENT"
+    state["audit_metadata"] = {
+        "ai_system_id": incident.ai_system_id,
+        "incident_id": incident.id,
+        "user": user.username,
+    }
+
+    return incident
+
+
+@router.post("/{incident_id}/corrective-action", response_model=AIIncidentResponse)
+def link_corrective_action(
+    incident_id: str,
+    payload: CorrectiveActionLink,
+    request: Request,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    incident = db.query(AIIncident).filter(AIIncident.id == incident_id).first()
+    if not incident:
+        raise HTTPException(status_code=404, detail="Incident not found")
+
+    change_request = (
+        db.query(ChangeRequest)
+        .filter(ChangeRequest.id == payload.change_request_id)
+        .first()
+    )
+    if not change_request:
+        raise HTTPException(status_code=404, detail="Change request not found")
+
+    allowed_types = {
+        ChangeType.PROMPT.value,
+        ChangeType.RAG_SOURCE.value,
+        ChangeType.CONFIG.value,
+    }
+    change_type_value = getattr(change_request.change_type, "value", change_request.change_type)
+    if change_type_value not in allowed_types:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid change request type for corrective action",
+        )
+
+    incident.corrective_change_request_id = payload.change_request_id
+    incident.status = IncidentStatus.RESOLVED
+
+    db.commit()
+    db.refresh(incident)
+
+    state = request.scope.setdefault("state", {})
+    state["audit_action"] = AI_INCIDENT_RESOLVED
+    state["audit_entity_id"] = incident.id
+    state["audit_entity_type"] = "AI_INCIDENT"
+    state["audit_metadata"] = {
+        "ai_system_id": incident.ai_system_id,
+        "incident_id": incident.id,
+        "user": user.username,
+    }
 
     return incident
