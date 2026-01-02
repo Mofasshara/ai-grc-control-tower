@@ -41,6 +41,14 @@ class IncidentStatus(str, enum.Enum):
     CLOSED = "CLOSED"
 
 
+class RootCauseCategory(str, enum.Enum):
+    PROMPT_DESIGN = "Prompt design"
+    RAG_DATA_ISSUE = "RAG data issue"
+    MODEL_LIMITATION = "Model limitation"
+    USER_MISUSE = "User misuse"
+    UNKNOWN = "Unknown"
+
+
 class AIIncident(Base):
     __tablename__ = "ai_incidents"
 
@@ -68,3 +76,12 @@ class AIIncident(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     created_by = Column(String, nullable=False)
+    root_cause_category = Column(
+        Enum(
+            RootCauseCategory,
+            values_callable=lambda enum_cls: [e.value for e in enum_cls],
+            create_type=False,
+        ),
+        nullable=True,
+    )
+    root_cause_description = Column(Text, nullable=True)

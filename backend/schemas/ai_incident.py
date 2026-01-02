@@ -2,7 +2,13 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from models.ai_incident import ImpactArea, IncidentSeverity, IncidentStatus, IncidentType
+from models.ai_incident import (
+    ImpactArea,
+    IncidentSeverity,
+    IncidentStatus,
+    IncidentType,
+    RootCauseCategory,
+)
 
 
 class AIIncidentCreate(BaseModel):
@@ -26,3 +32,8 @@ class AIIncidentResponse(BaseModel):
     created_by: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class AIIncidentInvestigation(BaseModel):
+    root_cause_category: RootCauseCategory
+    root_cause_description: str
