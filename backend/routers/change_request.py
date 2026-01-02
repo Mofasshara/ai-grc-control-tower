@@ -3,12 +3,12 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
-from backend.database import get_db
-from backend.models.ai_system import AISystem
-from backend.models.change_request import ChangeRequest, ChangeStatus, is_valid_transition
-from backend.schemas.change_request import ChangeRequestCreate, ChangeRequestResponse
-from backend.security.auth import get_current_user, require_roles
-from backend.security.roles import Role
+from database import get_db
+from models.ai_system import AISystem
+from models.change_request import ChangeRequest, ChangeStatus, is_valid_transition
+from schemas.change_request import ChangeRequestCreate, ChangeRequestResponse
+from security.auth import get_current_user, require_roles
+from security.roles import Role
 
 router = APIRouter(tags=["Change Requests"])
 

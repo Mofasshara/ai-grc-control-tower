@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from backend.models.ai_incident import (
+from models.ai_incident import (
     ImpactArea,
     IncidentSeverity,
     IncidentStatus,

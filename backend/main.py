@@ -6,13 +6,13 @@ from datetime import datetime
 from fastapi import FastAPI, Request
 from sqlalchemy.orm import Session
 
-from backend.database import SessionLocal
-from backend.models import AuditLog
-from backend.routers.ai_system import router as ai_system_router
-from backend.routers.change_request import router as change_request_router
-from backend.routers.prompt import router as prompt_router
-from backend.routers.rag import router as rag_router
-from backend.routers.incidents import router as incidents_router
+from database import SessionLocal
+from models import AuditLog
+from routers.ai_system import router as ai_system_router
+from routers.change_request import router as change_request_router
+from routers.prompt import router as prompt_router
+from routers.rag import router as rag_router
+from routers.incidents import router as incidents_router
 
 logger = logging.getLogger(__name__)
 

@@ -1,23 +1,23 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
-from backend.database import get_db
-from backend.models.ai_incident import AIIncident, IncidentStatus
-from backend.models.change_request import ChangeRequest, ChangeType
-from backend.models.ai_system import AISystem
-from backend.schemas.ai_incident import (
+from database import get_db
+from models.ai_incident import AIIncident, IncidentStatus
+from models.change_request import ChangeRequest, ChangeType
+from models.ai_system import AISystem
+from schemas.ai_incident import (
     AIIncidentCreate,
     AIIncidentInvestigation,
     AIIncidentResponse,
     CorrectiveActionLink,
 )
-from backend.utils.audit import (
+from utils.audit import (
     AI_INCIDENT_INVESTIGATED,
     AI_INCIDENT_REPORTED,
     AI_INCIDENT_RESOLVED,
 )
-from backend.security.auth import get_current_user
-from backend.security.roles import Role
+from security.auth import get_current_user
+from security.roles import Role
 
 router = APIRouter(prefix="/incidents", tags=["AI Incidents"])
 

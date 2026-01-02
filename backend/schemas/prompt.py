@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from backend.models.prompt_version import PromptStatus
+from models.prompt_version import PromptStatus
 
 
 class PromptTemplateCreate(BaseModel):

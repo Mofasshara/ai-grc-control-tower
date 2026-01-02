@@ -3,8 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from backend.models.rag_source import RAGSourceType
-from backend.models.rag_source_version import RAGSourceStatus
+from models.rag_source import RAGSourceType
+from models.rag_source_version import RAGSourceStatus
 
 
 class RAGSourceCreate(BaseModel):

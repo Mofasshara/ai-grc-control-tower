@@ -4,20 +4,20 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
-from backend.database import get_db
-from backend.models.prompt_template import PromptTemplate
-from backend.models.prompt_version import PromptStatus, PromptVersion
-from backend.models.change_request import ChangeRequest
-from backend.schemas.prompt import (
+from database import get_db
+from models.prompt_template import PromptTemplate
+from models.prompt_version import PromptStatus, PromptVersion
+from models.change_request import ChangeRequest
+from schemas.prompt import (
     PromptTemplateCreate,
     PromptTemplateResponse,
     PromptVersionCreate,
     PromptVersionResponse,
 )
-from backend.security.auth import get_current_user, require_roles
-from backend.security.roles import Role
-from backend.schemas.submit import VersionSubmitRequest
-from backend.utils.diff import generate_unified_diff
+from security.auth import get_current_user, require_roles
+from security.roles import Role
+from schemas.submit import VersionSubmitRequest
+from utils.diff import generate_unified_diff
 
 router = APIRouter(prefix="/prompts", tags=["Prompt Governance"])
 
