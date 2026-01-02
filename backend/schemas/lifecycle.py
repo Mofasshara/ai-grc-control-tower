@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from schemas.ai_system import LifecycleStatus
+from backend.schemas.ai_system import LifecycleStatus
 
 
 class LifecycleUpdate(BaseModel):

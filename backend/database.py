@@ -4,9 +4,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import make_url
 from sqlalchemy.orm import sessionmaker
 
-from models import Base
+from backend.models import Base
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+SQLALCHEMY_DATABASE_URL = DATABASE_URL
 MANAGED_IDENTITY_ENABLED = os.getenv("MANAGED_IDENTITY_ENABLED", "false").lower() == "true"
 AZURE_PG_SCOPE = os.getenv(
     "AZURE_PG_SCOPE",

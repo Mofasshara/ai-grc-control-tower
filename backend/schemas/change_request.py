@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from models.change_request import ChangeStatus, ChangeType
+from backend.models.change_request import ChangeStatus, ChangeType
 
 
 class ChangeRequestCreate(BaseModel):

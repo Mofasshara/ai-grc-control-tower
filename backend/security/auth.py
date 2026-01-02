@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, Request
 
-from security.roles import Role
+from backend.security.roles import Role
 
 
 class MockUser:

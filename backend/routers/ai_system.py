@@ -3,18 +3,18 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
-from schemas.ai_system import AISystemCreate, AISystemResponse
-from schemas.lifecycle import LifecycleUpdate
-from models.ai_system import AISystem, ALLOWED_TRANSITIONS
-from models.change_request import ChangeRequest
-from models.ai_system_prompt_binding import AISystemPromptBinding
-from models.ai_system_rag_binding import AISystemRAGBinding
-from models.prompt_version import PromptVersion, PromptStatus
-from models.rag_source_version import RAGSourceVersion, RAGSourceStatus
-from schemas.activation import PromptActivationRequest, RAGActivationRequest
-from database import get_db
-from security.auth import get_current_user, require_roles
-from security.roles import Role
+from backend.schemas.ai_system import AISystemCreate, AISystemResponse
+from backend.schemas.lifecycle import LifecycleUpdate
+from backend.models.ai_system import AISystem, ALLOWED_TRANSITIONS
+from backend.models.change_request import ChangeRequest
+from backend.models.ai_system_prompt_binding import AISystemPromptBinding
+from backend.models.ai_system_rag_binding import AISystemRAGBinding
+from backend.models.prompt_version import PromptVersion, PromptStatus
+from backend.models.rag_source_version import RAGSourceVersion, RAGSourceStatus
+from backend.schemas.activation import PromptActivationRequest, RAGActivationRequest
+from backend.database import get_db
+from backend.security.auth import get_current_user, require_roles
+from backend.security.roles import Role
 
 router = APIRouter(prefix="/ai-systems", tags=["AI Systems"])
 

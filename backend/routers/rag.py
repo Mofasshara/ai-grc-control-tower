@@ -5,20 +5,20 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
-from database import get_db
-from models.rag_source import RAGSource
-from models.rag_source_version import RAGSourceStatus, RAGSourceVersion
-from models.change_request import ChangeRequest
-from schemas.rag import (
+from backend.database import get_db
+from backend.models.rag_source import RAGSource
+from backend.models.rag_source_version import RAGSourceStatus, RAGSourceVersion
+from backend.models.change_request import ChangeRequest
+from backend.schemas.rag import (
     RAGSourceCreate,
     RAGSourceResponse,
     RAGSourceVersionCreate,
     RAGSourceVersionResponse,
 )
-from security.auth import get_current_user, require_roles
-from security.roles import Role
-from utils.diff import generate_unified_diff
-from schemas.submit import VersionSubmitRequest
+from backend.security.auth import get_current_user, require_roles
+from backend.security.roles import Role
+from backend.utils.diff import generate_unified_diff
+from backend.schemas.submit import VersionSubmitRequest
 
 router = APIRouter(prefix="/rag", tags=["RAG Governance"])
 
