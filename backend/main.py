@@ -1,6 +1,7 @@
 import hashlib
 import json
 import logging
+import subprocess
 from datetime import datetime
 
 from fastapi import FastAPI, Request
@@ -21,6 +22,26 @@ app = FastAPI(
     description="Regulator-first AI governance platform",
     version="0.1.0",
 )
+
+
+@app.on_event("startup")
+def run_migrations():
+    """Run database migrations on startup."""
+    try:
+        logger.info("Running database migrations...")
+        result = subprocess.run(
+            ["alembic", "upgrade", "head"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        logger.info(f"Migrations completed: {result.stdout}")
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Migration failed: {e.stderr}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error during migration: {e}")
+        raise
 
 app.include_router(ai_system_router)
 app.include_router(change_request_router)
