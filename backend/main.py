@@ -2,6 +2,7 @@ import hashlib
 import json
 import logging
 import subprocess
+import sys
 from datetime import datetime
 
 from fastapi import FastAPI, Request
@@ -25,17 +26,23 @@ app = FastAPI(
 
 
 @app.on_event("startup")
-def create_tables():
-    """Create database tables on startup if they don't exist."""
+def run_migrations():
+    """Run database migrations on startup using the current Python interpreter."""
     try:
-        logger.info("Creating database tables...")
-        from database import init_db
-        init_db()
-        logger.info("Database tables created successfully")
+        logger.info("Running database migrations...")
+        result = subprocess.run(
+            [sys.executable, "-m", "alembic", "upgrade", "head"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        logger.info(f"Migrations completed: {result.stdout}")
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Migration failed: {e.stderr}")
+        raise
     except Exception as e:
-        logger.error(f"Error creating tables: {e}")
-        # Don't raise - let the app start even if table creation fails
-        # This allows healthcheck to work
+        logger.error(f"Unexpected error during migration: {e}")
+        raise
 
 app.include_router(ai_system_router)
 app.include_router(change_request_router)
