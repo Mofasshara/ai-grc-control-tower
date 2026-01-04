@@ -58,8 +58,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: python-app
-          path: .
-      
+          path: backend-artifact
+
+      - name: Move backend contents to deployment root
+        run: |
+          mv backend-artifact/* .
+          rm -rf backend-artifact
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
