@@ -69,20 +69,30 @@ class RiskMetricsService:
         )
         return {str(system_id): count for system_id, count in results}
 
-    def hallucinations_per_week(self):
-        """Count hallucination incidents in the last 7 days"""
-        one_week_ago = datetime.utcnow() - timedelta(days=7)
-
-        count = (
-            self.db.query(AIIncident)
+    def hallucinations_per_week(self, weeks: int = 8):
+        """Count hallucination incidents per week over a recent window."""
+        cutoff = datetime.utcnow() - timedelta(weeks=weeks)
+        results = (
+            self.db.query(
+                func.date_trunc("week", AIIncident.created_at).label("week_start"),
+                func.count(AIIncident.id),
+            )
             .filter(
                 AIIncident.incident_type == IncidentType.HALLUCINATION,
-                AIIncident.created_at >= one_week_ago,
+                AIIncident.created_at >= cutoff,
             )
-            .count()
+            .group_by("week_start")
+            .order_by("week_start")
+            .all()
         )
 
-        return {"hallucinations_last_7_days": count}
+        return [
+            {
+                "week_start": week_start.date().isoformat(),
+                "count": count,
+            }
+            for week_start, count in results
+        ]
 
     def severity_trend(self, days=30):
         """Show incident severity distribution over time"""

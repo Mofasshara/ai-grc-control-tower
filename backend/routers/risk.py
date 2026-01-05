@@ -45,7 +45,7 @@ def risk_for_system(id: str, db=Depends(get_db)):
 
 @router.get("/trends/hallucinations")
 def hallucination_trend(db=Depends(get_db)):
-    """Get hallucination incident count for the last 7 days"""
+    """Get hallucination incident counts per week."""
     service = RiskMetricsService(db)
     return service.hallucinations_per_week()
 
@@ -62,6 +62,17 @@ def repeated_incidents(db=Depends(get_db)):
     """Identify AI systems with more than 3 incidents (unstable systems)"""
     service = RiskMetricsService(db)
     return service.repeated_incidents()
+
+
+@router.get("/trends/incidents")
+def incident_trends(db=Depends(get_db)):
+    """Aggregate incident trend signals for monitoring views."""
+    service = RiskMetricsService(db)
+    return {
+        "hallucinations_per_week": service.hallucinations_per_week(),
+        "severity_trend": service.severity_trend(),
+        "repeated_incidents": service.repeated_incidents(),
+    }
 
 
 @router.get("/drift")
