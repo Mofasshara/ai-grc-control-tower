@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Text
+from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 
 from . import Base, generate_uuid
@@ -39,6 +39,9 @@ class ChangeRequest(Base):
     )
 
     description = Column(Text, nullable=False)
+
+    contains_personal_data = Column(Boolean, default=False, nullable=False)
+
     business_justification = Column(Text, nullable=False)
     impact_assessment = Column(Text, nullable=False)
     rollback_plan = Column(Text, nullable=False)

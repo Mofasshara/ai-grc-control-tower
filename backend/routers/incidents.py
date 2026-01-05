@@ -16,13 +16,17 @@ from utils.audit import (
     AI_INCIDENT_REPORTED,
     AI_INCIDENT_RESOLVED,
 )
-from security.auth import get_current_user
+from security.auth import get_current_user, require_not_auditor
 from security.roles import Role
 
 router = APIRouter(prefix="/incidents", tags=["AI Incidents"])
 
 
-@router.post("/ai-systems/{ai_system_id}/incidents", response_model=AIIncidentResponse)
+@router.post(
+    "/ai-systems/{ai_system_id}/incidents",
+    response_model=AIIncidentResponse,
+    dependencies=[Depends(require_not_auditor)],
+)
 def create_incident(
     ai_system_id: str,
     payload: AIIncidentCreate,
@@ -40,6 +44,7 @@ def create_incident(
         severity=payload.severity,
         impact_area=payload.impact_area,
         description=payload.description,
+        contains_personal_data=payload.contains_personal_data,
         detected_by=user.username,
         created_by=user.username,
         status=IncidentStatus.OPEN,
@@ -75,7 +80,11 @@ def get_incident(incident_id: str, db: Session = Depends(get_db)):
     return incident
 
 
-@router.post("/{incident_id}/investigate", response_model=AIIncidentResponse)
+@router.post(
+    "/{incident_id}/investigate",
+    response_model=AIIncidentResponse,
+    dependencies=[Depends(require_not_auditor)],
+)
 def investigate_incident(
     incident_id: str,
     payload: AIIncidentInvestigation,
@@ -83,7 +92,7 @@ def investigate_incident(
     db: Session = Depends(get_db),
     user=Depends(get_current_user),
 ):
-    if user.role not in (Role.COMPLIANCE, Role.AI_OWNER):
+    if not any(role in user.mapped_roles for role in (Role.COMPLIANCE, Role.AI_OWNER)):
         raise HTTPException(status_code=403, detail="Not authorized")
 
     incident = db.query(AIIncident).filter(AIIncident.id == incident_id).first()
@@ -111,7 +120,11 @@ def investigate_incident(
     return incident
 
 
-@router.post("/{incident_id}/corrective-action", response_model=AIIncidentResponse)
+@router.post(
+    "/{incident_id}/corrective-action",
+    response_model=AIIncidentResponse,
+    dependencies=[Depends(require_not_auditor)],
+)
 def link_corrective_action(
     incident_id: str,
     payload: CorrectiveActionLink,

@@ -7,7 +7,8 @@ from database import get_db
 from models.ai_system import AISystem
 from models.change_request import ChangeRequest, ChangeStatus, is_valid_transition
 from schemas.change_request import ChangeRequestCreate, ChangeRequestResponse
-from security.auth import get_current_user, require_roles
+from audit import log_security_event
+from security.auth import get_current_user, require_not_auditor, require_roles
 from security.roles import Role
 
 router = APIRouter(tags=["Change Requests"])
@@ -16,7 +17,7 @@ router = APIRouter(tags=["Change Requests"])
 @router.post(
     "/ai-systems/{system_id}/changes",
     response_model=ChangeRequestResponse,
-    dependencies=[Depends(require_roles(Role.ADMIN, Role.AI_OWNER))],
+    dependencies=[Depends(require_roles(Role.ADMIN, Role.AI_OWNER)), Depends(require_not_auditor)],
 )
 def create_change_request(
     system_id: str,
@@ -32,6 +33,7 @@ def create_change_request(
         ai_system_id=system_id,
         change_type=payload.change_type,
         description=payload.description,
+        contains_personal_data=payload.contains_personal_data,
         business_justification=payload.business_justification,
         impact_assessment=payload.impact_assessment,
         rollback_plan=payload.rollback_plan,
@@ -67,7 +69,7 @@ def get_change_request(change_id: str, db: Session = Depends(get_db)):
 
 @router.post(
     "/changes/{change_id}/approve",
-    dependencies=[Depends(require_roles(Role.ADMIN, Role.COMPLIANCE))],
+    dependencies=[Depends(require_roles(Role.ADMIN, Role.COMPLIANCE)), Depends(require_not_auditor)],
 )
 def approve_change_request(
     change_id: str,
@@ -88,7 +90,7 @@ def approve_change_request(
             detail=f"Invalid transition: {current_value} -> {new_value}",
         )
 
-    if current_value == "submitted" and user.role != Role.COMPLIANCE:
+    if current_value == "submitted" and Role.COMPLIANCE not in user.mapped_roles:
         raise HTTPException(
             status_code=403,
             detail="Only Compliance can approve submitted changes",
@@ -108,6 +110,8 @@ def approve_change_request(
     state["audit_previous_state"] = current_value
     state["audit_new_state"] = new_value
 
+    log_security_event(user.user_id, "approve_change", {"change_id": change_id})
+
     return {
         "id": change.id,
         "old_status": current_value,
@@ -119,7 +123,7 @@ def approve_change_request(
 
 @router.post(
     "/changes/{change_id}/reject",
-    dependencies=[Depends(require_roles(Role.ADMIN, Role.COMPLIANCE))],
+    dependencies=[Depends(require_roles(Role.ADMIN, Role.COMPLIANCE)), Depends(require_not_auditor)],
 )
 def reject_change_request(
     change_id: str,
@@ -165,7 +169,7 @@ def reject_change_request(
 
 @router.post(
     "/changes/{change_id}/submit",
-    dependencies=[Depends(require_roles(Role.ADMIN, Role.AI_OWNER))],
+    dependencies=[Depends(require_roles(Role.ADMIN, Role.AI_OWNER)), Depends(require_not_auditor)],
 )
 def submit_change_request(
     change_id: str,
@@ -210,7 +214,7 @@ def submit_change_request(
 
 @router.post(
     "/changes/{change_id}/implement",
-    dependencies=[Depends(require_roles(Role.ADMIN, Role.AI_OWNER))],
+    dependencies=[Depends(require_roles(Role.ADMIN, Role.AI_OWNER)), Depends(require_not_auditor)],
 )
 def implement_change_request(
     change_id: str,

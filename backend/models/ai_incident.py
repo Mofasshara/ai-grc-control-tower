@@ -2,7 +2,7 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Text
+from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 
 from . import Base
@@ -63,6 +63,8 @@ class AIIncident(Base):
     incident_type = Column(Enum(IncidentType), nullable=False)
 
     description = Column(Text, nullable=False)
+
+    contains_personal_data = Column(Boolean, default=False, nullable=False)
 
     severity = Column(Enum(IncidentSeverity), nullable=False)
 

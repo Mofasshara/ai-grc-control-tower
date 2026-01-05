@@ -107,3 +107,23 @@ def require_roles(*allowed_roles: Role):
 
 def require_role(*allowed_roles: Role):
     return require_roles(*allowed_roles)
+
+
+def require_not_auditor(user: User = Depends(get_current_user)):
+    """Enforce read-only access for auditors.
+
+    This dependency prevents auditors from modifying operational data.
+    Auditors can view all data but cannot create, update, or delete records.
+    This enforces segregation of duties required by regulatory frameworks.
+    """
+    if user.role == Role.AUDITOR:
+        log_security_event(
+            user.user_id,
+            "auditor_write_attempt",
+            {"message": "Auditor attempted to modify data"},
+        )
+        raise HTTPException(
+            status_code=403,
+            detail="Auditors have read-only access.",
+        )
+    return user

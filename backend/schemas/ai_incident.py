@@ -16,6 +16,10 @@ class AIIncidentCreate(BaseModel):
     severity: IncidentSeverity = Field(..., description="Severity level")
     impact_area: ImpactArea = Field(..., description="Impact area")
     description: str = Field(..., description="Detailed description of the incident")
+    contains_personal_data: bool = Field(
+        default=False,
+        description="Whether this incident contains personal data subject to GDPR",
+    )
 
 
 class AIIncidentResponse(BaseModel):
@@ -26,6 +30,7 @@ class AIIncidentResponse(BaseModel):
     severity: IncidentSeverity
     impact_area: ImpactArea
     description: str
+    contains_personal_data: bool
     detected_by: str
     detection_date: datetime
     status: IncidentStatus

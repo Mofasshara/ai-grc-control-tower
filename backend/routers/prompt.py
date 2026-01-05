@@ -14,7 +14,7 @@ from schemas.prompt import (
     PromptVersionCreate,
     PromptVersionResponse,
 )
-from security.auth import get_current_user, require_roles
+from security.auth import get_current_user, require_not_auditor, require_roles
 from security.roles import Role
 from schemas.submit import VersionSubmitRequest
 from utils.diff import generate_unified_diff
@@ -25,7 +25,7 @@ router = APIRouter(prefix="/prompts", tags=["Prompt Governance"])
 @router.post(
     "/templates",
     response_model=PromptTemplateResponse,
-    dependencies=[Depends(require_roles(Role.ADMIN, Role.AI_OWNER))],
+    dependencies=[Depends(require_roles(Role.ADMIN, Role.AI_OWNER)), Depends(require_not_auditor)],
 )
 def create_prompt_template(
     payload: PromptTemplateCreate,
@@ -67,7 +67,7 @@ def get_prompt_template(template_id: str, db: Session = Depends(get_db)):
 @router.post(
     "/templates/{template_id}/versions",
     response_model=PromptVersionResponse,
-    dependencies=[Depends(require_roles(Role.ADMIN, Role.AI_OWNER))],
+    dependencies=[Depends(require_roles(Role.ADMIN, Role.AI_OWNER)), Depends(require_not_auditor)],
 )
 def create_prompt_version(
     template_id: str,
@@ -155,7 +155,7 @@ def get_prompt_diff(version_id: str, db: Session = Depends(get_db)):
 
 @router.post(
     "/versions/{version_id}/submit",
-    dependencies=[Depends(require_roles(Role.ADMIN, Role.AI_OWNER))],
+    dependencies=[Depends(require_roles(Role.ADMIN, Role.AI_OWNER)), Depends(require_not_auditor)],
 )
 def submit_prompt_version(
     version_id: str,

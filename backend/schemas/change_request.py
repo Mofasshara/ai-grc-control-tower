@@ -9,6 +9,10 @@ from models.change_request import ChangeStatus, ChangeType
 class ChangeRequestCreate(BaseModel):
     change_type: ChangeType = Field(..., description="Type of change being requested")
     description: str = Field(..., description="Detailed description of the change")
+    contains_personal_data: bool = Field(
+        default=False,
+        description="Whether this change request contains personal data subject to GDPR",
+    )
     business_justification: str = Field(..., description="Why this change is needed")
     impact_assessment: str = Field(..., description="Impact on users, systems, and risk")
     rollback_plan: str = Field(..., description="How to revert if something goes wrong")
@@ -20,6 +24,7 @@ class ChangeRequestResponse(BaseModel):
     ai_system_id: str
     change_type: ChangeType
     description: str
+    contains_personal_data: bool
     business_justification: str
     impact_assessment: str
     rollback_plan: str
