@@ -7,3 +7,6 @@ pydantic
 azure-identity
 python-dotenv
 httpx
+fpdf
+azure-storage-blob
+python-jose
