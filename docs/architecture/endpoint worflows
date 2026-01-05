@@ -1,0 +1,183 @@
+# The Hallucination Detection Lifecycle (End-to-End)
+AI Output Generated
+↓
+Detection Signals Raised (human / RAG / pattern)
+↓
+AI Incident Created (Hallucination)
+↓
+Severity & Impact Classified
+↓
+Root Cause Analysis
+↓
+Corrective Action (Prompt/RAG change)
+↓
+Approval Required
+↓
+Evidence Generated
+
+# AI System Registry Workflow (/ai-systems)
+AI System Create Request
+↓
+Role Check (Admin or AI Owner)
+↓
+Validate Unique Name
+↓
+AI System Record Created (draft)
+↓
+Audit Log Entry (AI_SYSTEM_CREATED)
+↓
+Response Returned
+
+# AI System Lifecycle Workflow (/ai-systems/{id}/lifecycle)
+Lifecycle Update Requested
+↓
+Role Check (Admin, AI Owner, Compliance)
+↓
+Validate Allowed Transition
+↓
+Compliance Approval Required for submitted → approved
+↓
+Lifecycle Updated
+↓
+Audit Log Entry (LIFECYCLE_STATE_CHANGED)
+↓
+Response Returned
+
+# Prompt Activation Workflow (/ai-systems/{id}/prompts/activate)
+Activation Requested
+↓
+Role Check + High-Risk Gate
+↓
+Prompt Version Exists + Submitted
+↓
+Change Request Exists + Approved
+↓
+Deactivate Prior Binding
+↓
+Activate New Prompt Binding
+↓
+Audit Log Entry (PROMPT_VERSION_ACTIVATED)
+↓
+Response Returned
+
+# RAG Activation Workflow (/ai-systems/{id}/rag/activate)
+Activation Requested
+↓
+Role Check + High-Risk Gate
+↓
+RAG Version Exists + Submitted
+↓
+Change Request Exists + Approved
+↓
+Deactivate Prior Binding
+↓
+Activate New RAG Binding
+↓
+Audit Log Entry (RAG_VERSION_ACTIVATED)
+↓
+Response Returned
+
+# Change Request Workflow (/ai-systems/{id}/changes and /changes/*)
+Change Request Created (draft)
+↓
+AI Owner Submits Change
+↓
+Compliance Reviews
+↓
+Admin/Compliance Approves or Rejects
+↓
+Audit Log Entry (CHANGE_REQUEST_APPROVED/REJECTED)
+↓
+Deployment Triggered After Approval
+
+# Prompt Template & Version Workflow (/prompts/*)
+Prompt Template Created
+↓
+Prompt Version Drafted (hash + diff)
+↓
+Change Request Submitted (status = submitted)
+↓
+Prompt Version Linked + Submitted
+↓
+Activation via /ai-systems/{id}/prompts/activate
+↓
+Audit Log Entries for each step
+
+# RAG Source & Version Workflow (/rag/*)
+RAG Source Created
+↓
+RAG Version Drafted (hash + diff)
+↓
+Change Request Submitted (status = submitted)
+↓
+RAG Version Linked + Submitted
+↓
+Activation via /ai-systems/{id}/rag/activate
+↓
+Audit Log Entries for each step
+
+# Incident Workflow (/incidents/*)
+Incident Reported
+↓
+Severity + Impact Classified
+↓
+Investigation + Root Cause Logged
+↓
+Corrective Change Linked
+↓
+Incident Resolved
+↓
+Audit Log Entries (reported, investigated, resolved)
+
+# Evidence Pack Workflow (/evidence/generate)
+Evidence Generation Requested
+↓
+Collect Inventory, Changes, Incidents, Prompts/RAG
+↓
+Generate Hash Manifest + PDF Summary
+↓
+Pack ZIP Created
+↓
+Stored in Blob Storage
+↓
+Evidence Returned to Requester
+
+# Risk Summary Workflow (/risk/summary)
+Risk Summary Requested
+↓
+Aggregate Severity Counts
+↓
+Compute Hallucination Rates
+↓
+Compute Change Volatility
+↓
+Set High-Risk Flags
+↓
+JSON Returned
+
+# Incident Trend Workflow (/risk/trends/incidents)
+Trend Requested
+↓
+Compute Hallucinations per Week
+↓
+Compute Severity Trend
+↓
+Identify Repeated Incidents
+↓
+JSON Returned
+
+# Drift Signals Workflow (/risk/drift)
+Drift Requested
+↓
+Compute Prompt Drift
+↓
+Compute RAG Drift
+↓
+Correlate Changes After Incidents
+↓
+JSON Returned
+
+# Health Check Workflow (/health)
+Health Request
+↓
+Service Responds OK
