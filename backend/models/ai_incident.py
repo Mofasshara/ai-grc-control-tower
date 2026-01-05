@@ -92,3 +92,14 @@ class AIIncident(Base):
         ForeignKey("change_requests.id"),
         nullable=True,
     )
+
+    triage_suggested_severity = Column(String, nullable=True)
+    triage_suggested_owner_role = Column(String, nullable=True)
+    triage_suggested_root_cause_category = Column(String, nullable=True)
+    triage_suggestion_reason = Column(String, nullable=True)
+
+    triage_status = Column(String, default="SUGGESTED", nullable=False)
+    triage_confirmed_by = Column(String, nullable=True)
+    triage_confirmed_at = Column(DateTime, nullable=True)
+
+    triage_override_reason = Column(String, nullable=True)
