@@ -62,3 +62,15 @@ def repeated_incidents(db=Depends(get_db)):
     """Identify AI systems with more than 3 incidents (unstable systems)"""
     service = RiskMetricsService(db)
     return service.repeated_incidents()
+
+
+@router.get("/drift")
+def drift_signals(db=Depends(get_db)):
+    """Get drift signals for all AI systems (prompt, RAG, and incident-correlated changes)"""
+    service = RiskMetricsService(db)
+
+    return {
+        "prompt_drift": service.prompt_drift(),
+        "rag_drift": service.rag_drift(),
+        "incident_correlated_drift": service.change_after_incident(),
+    }

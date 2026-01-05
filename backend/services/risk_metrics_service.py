@@ -3,7 +3,16 @@ from datetime import datetime, timedelta
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from models import AIIncident, AISystem, ChangeRequest, IncidentType
+from models import (
+    AIIncident,
+    AISystem,
+    AISystemPromptBinding,
+    AISystemRAGBinding,
+    ChangeRequest,
+    IncidentType,
+    PromptVersion,
+    RAGSourceVersion,
+)
 
 
 class RiskMetricsService:
@@ -109,3 +118,77 @@ class RiskMetricsService:
         )
 
         return {str(system_id): count for system_id, count in results}
+
+    def prompt_drift(self):
+        """Detect frequent prompt changes (>3 in 30 days) per AI system"""
+        cutoff = datetime.utcnow() - timedelta(days=30)
+
+        results = (
+            self.db.query(
+                AISystemPromptBinding.ai_system_id, func.count(PromptVersion.id)
+            )
+            .join(
+                PromptVersion,
+                AISystemPromptBinding.prompt_version_id == PromptVersion.id,
+            )
+            .filter(PromptVersion.created_at >= cutoff)
+            .group_by(AISystemPromptBinding.ai_system_id)
+            .all()
+        )
+
+        drift = {}
+        for system_id, count in results:
+            drift[str(system_id)] = {
+                "prompt_changes_30d": count,
+                "prompt_drift_flag": count >= 3,
+            }
+
+        return drift
+
+    def rag_drift(self):
+        """Detect frequent RAG source changes (>3 in 30 days) per AI system"""
+        cutoff = datetime.utcnow() - timedelta(days=30)
+
+        results = (
+            self.db.query(
+                AISystemRAGBinding.ai_system_id, func.count(RAGSourceVersion.id)
+            )
+            .join(
+                RAGSourceVersion,
+                AISystemRAGBinding.rag_source_version_id == RAGSourceVersion.id,
+            )
+            .filter(RAGSourceVersion.created_at >= cutoff)
+            .group_by(AISystemRAGBinding.ai_system_id)
+            .all()
+        )
+
+        drift = {}
+        for system_id, count in results:
+            drift[str(system_id)] = {
+                "rag_changes_30d": count,
+                "rag_drift_flag": count >= 3,
+            }
+
+        return drift
+
+    def change_after_incident(self):
+        """Find changes made within 7 days of incidents (reactive behavior)"""
+        output = {}
+
+        incidents = self.db.query(AIIncident).all()
+        changes = self.db.query(ChangeRequest).all()
+
+        for inc in incidents:
+            for ch in changes:
+                if ch.ai_system_id == inc.ai_system_id:
+                    time_diff = (ch.created_at - inc.created_at).days
+                    if 0 <= time_diff <= 7:
+                        output.setdefault(str(inc.ai_system_id), []).append(
+                            {
+                                "incident_id": str(inc.id),
+                                "change_id": str(ch.id),
+                                "days_after_incident": time_diff,
+                            }
+                        )
+
+        return output
