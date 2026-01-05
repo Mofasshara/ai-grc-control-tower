@@ -438,18 +438,33 @@ az webapp auth update --name ai-grc-api-dev --resource-group rg-ai-grc-dev \
 
 ---
 
-### 2026-01-04: Network Hardening Attempts (Reverted)
-**Attempted**: App Service IP restrictions, PostgreSQL public access disable
+### 2026-01-05: PostgreSQL Network Hardening (Partial Success)
+**Goal**: Restrict PostgreSQL access to only Azure App Service
 
-**Result**: App became inaccessible due to incorrect approach
+**Implemented**:
+- ✅ Removed dangerous `temp-allow-all` rule (0.0.0.1-255.255.255.254) - eliminated public internet access
+- ✅ Kept `AllowAzureServices` rule (0.0.0.0)
+- ✅ Kept individual App Service outbound IP rules (13 IPs)
 
-**Reverted**:
-- Removed App Service IP restrictions
-- Re-enabled PostgreSQL public access
-- Added back all App Service outbound IP firewall rules
-- Added temporary allow-all PostgreSQL rule for testing
+**Lessons Learned**:
+- **CRITICAL**: AllowAzureServices (0.0.0.0) alone is NOT sufficient for App Service → PostgreSQL connectivity
+- Individual outbound IP firewall rules are REQUIRED for Azure App Service to connect to PostgreSQL Flexible Server
+- Removing these rules causes immediate app failure (database connection timeout)
 
-**Status**: Network hardening paused until proper documentation in place
+**Not Implemented** (requires infrastructure changes):
+- ❌ App Service IP restrictions - would break Easy Auth (Azure AD callbacks come from Microsoft IPs)
+- ❌ Disable PostgreSQL public access - requires VNet integration + Private Endpoint
+
+**Current Security Posture**:
+- PostgreSQL: Accessible ONLY from Azure services (no public internet access)
+- App Service: Protected by Easy Auth (Azure AD authentication required)
+- Database: Password authentication (Managed Identity not yet configured)
+
+**Next Steps for Full Hardening**:
+1. Set up VNet integration for App Service
+2. Create Private Endpoint for PostgreSQL
+3. Disable PostgreSQL public access
+4. Enable Managed Identity authentication (remove password)
 
 ---
 
