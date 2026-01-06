@@ -103,3 +103,7 @@ class AIIncident(Base):
     triage_confirmed_at = Column(DateTime, nullable=True)
 
     triage_override_reason = Column(String, nullable=True)
+
+    assigned_to_role = Column(String, nullable=True)
+    assigned_to_user = Column(String, nullable=True)
+    assigned_at = Column(DateTime, nullable=True)

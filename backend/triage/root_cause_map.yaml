@@ -1,0 +1,31 @@
+# Root Cause Mapping for AI-GRC Control Tower
+
+Hallucination:
+  - category: "Prompt design"
+    explanation: "Prompt structure may be unclear or overly open-ended."
+  - category: "RAG data issue"
+    explanation: "Retrieved context may be insufficient or off-target."
+
+Incorrect factual output:
+  - category: "RAG data issue"
+    explanation: "Knowledge base may be outdated or missing critical information."
+  - category: "Model limitation"
+    explanation: "Model produced an incorrect response despite available context."
+
+Policy violation:
+  - category: "Prompt design"
+    explanation: "Prompt framing may not enforce policy constraints strongly enough."
+  - category: "User misuse"
+    explanation: "User input may have attempted to bypass guardrails."
+
+Bias / fairness issue:
+  - category: "Prompt design"
+    explanation: "Prompt wording may introduce bias or framing effects."
+  - category: "Model limitation"
+    explanation: "Model behavior may reflect biased training data."
+
+Unsafe recommendation:
+  - category: "Model limitation"
+    explanation: "Model produced unsafe or harmful content."
+  - category: "Prompt design"
+    explanation: "Prompt may not include sufficient safety constraints."

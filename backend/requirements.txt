@@ -10,3 +10,4 @@ httpx
 fpdf
 azure-storage-blob
 python-jose
+pyyaml

@@ -1,0 +1,37 @@
+# Triage rules for AI-GRC Control Tower
+
+severity_rules:
+  - condition: "risk in ('high', 'critical') and type == 'Hallucination'"
+    suggested_severity: "High"
+    owner_role: "COMPLIANCE"
+    root_cause: "Hallucination"
+    reason: "High-risk system + hallucination"
+
+  - condition: "type == 'Policy violation'"
+    suggested_severity: "High"
+    owner_role: "COMPLIANCE"
+    root_cause: "Policy violation"
+    reason: "Policy breach requires escalation"
+
+  - condition: "type == 'Incorrect factual output' and risk == 'low'"
+    suggested_severity: "Low"
+    owner_role: "AI_OWNER"
+    root_cause: "Incorrect factual output"
+    reason: "Low-risk system + minor factual error"
+
+escalation_rules:
+  - condition: "incidents_last_30_days >= 3"
+    escalate_by: 1
+    reason: "Repeated incidents indicate instability"
+
+  - condition: "volatility > 10 and severity == 'High'"
+    escalate_by: 0
+    reason: "High volatility + high severity requires escalation"
+
+
+drift_rules:
+  - condition: "drift_flag == True and type == 'Hallucination'"
+    suggested_severity: "High"
+    owner_role: "COMPLIANCE"
+    root_cause: "Drift"
+    reason: "Drift-linked hallucination"
